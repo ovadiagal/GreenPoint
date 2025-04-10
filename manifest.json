@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT Confirmation Popup",
+  "version": "1.0",
+  "description": "Show a confirmation popup before sending a ChatGPT conversation POST request.",
+  "permissions": ["scripting"],
+  "host_permissions": ["https://chatgpt.com/*", "http://localhost:3000/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js", "popup.css"],
+      "matches": ["https://chatgpt.com/*"],
+      "use_dynamic_url": true
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
