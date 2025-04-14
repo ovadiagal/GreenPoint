@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT Prompt Interceptor",
+  "version": "1.0",
+  "description": "Intercepts ChatGPT fetch requests and lets you run prompts on cloud or locally via Ollama.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["*://chatgpt.com/*", "http://localhost:11434/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://chatgpt.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["*://chatgpt.com/*"]
+    }
+  ]
+}
