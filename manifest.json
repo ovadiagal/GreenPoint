@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT Prompt Interceptor",
+  "name": "GreenPoint",
   "version": "1.0",
-  "description": "Intercepts ChatGPT fetch requests and lets you run prompts on cloud or locally via Ollama.",
+  "description": "Environmental checkpoints for ChatGPT",
   "permissions": ["scripting", "activeTab"],
   "host_permissions": ["*://chatgpt.com/*", "http://localhost:11434/*"],
   "content_scripts": [
@@ -17,5 +17,10 @@
       "resources": ["injected.js"],
       "matches": ["*://chatgpt.com/*"]
     }
-  ]
+  ],
+  "icons": {
+    "16": "images/logo16.png",
+    "48": "images/logo48.png",
+    "128": "images/logo128.png"
+  }
 }
