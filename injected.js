@@ -37,6 +37,7 @@
         const promptText = parsedBody?.messages?.[0]?.content?.parts?.[0];
 
         if (promptText) {
+          // Get the decision based on the current mode
           const decision = await getUserDecision(promptText);
 
           if (decision === "cloud") {

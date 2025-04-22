@@ -2,6 +2,106 @@
 if (!window.myExtensionInitialized) {
   window.myExtensionInitialized = true;
 
+  // Define the extension modes
+  const EXTENSION_MODES = {
+    ALWAYS_CLOUD: "always_cloud",
+    ASK_EVERY_TIME: "ask_every_time",
+    ALWAYS_LOCAL: "always_local",
+  };
+
+  // Set default mode to ask every time
+  window.extensionMode = EXTENSION_MODES.ASK_EVERY_TIME;
+
+  // Create the mode selector slider
+  function createModeSelector() {
+    const sliderContainer = document.createElement("div");
+    sliderContainer.id = "greenpoint-mode-selector";
+    Object.assign(sliderContainer.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      padding: "10px 15px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+      zIndex: "10000",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      fontFamily: "Arial, sans-serif",
+      fontSize: "14px",
+      width: "200px",
+    });
+
+    const title = document.createElement("div");
+    title.textContent = "Greenpoint Mode";
+    title.style.fontWeight = "bold";
+    title.style.marginBottom = "8px";
+    sliderContainer.appendChild(title);
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "0";
+    slider.max = "2";
+    slider.value = "1"; // Default to middle option (ask every time)
+    slider.id = "greenpoint-mode-slider";
+    Object.assign(slider.style, {
+      width: "100%",
+      marginBottom: "8px",
+    });
+    sliderContainer.appendChild(slider);
+
+    const labelsContainer = document.createElement("div");
+    labelsContainer.style.display = "flex";
+    labelsContainer.style.justifyContent = "space-between";
+    labelsContainer.style.width = "100%";
+    labelsContainer.style.fontSize = "12px";
+
+    const cloudLabel = document.createElement("div");
+    cloudLabel.textContent = "Always Cloud";
+    cloudLabel.style.color = "#e74c3c";
+    cloudLabel.style.textAlign = "center";
+    cloudLabel.style.width = "33%";
+
+    const askLabel = document.createElement("div");
+    askLabel.textContent = "Ask Every Time";
+    askLabel.style.textAlign = "center";
+    askLabel.style.width = "33%";
+
+    const localLabel = document.createElement("div");
+    localLabel.textContent = "Always Local";
+    localLabel.style.color = "#2ecc71";
+    localLabel.style.textAlign = "center";
+    localLabel.style.width = "33%";
+
+    labelsContainer.appendChild(cloudLabel);
+    labelsContainer.appendChild(askLabel);
+    labelsContainer.appendChild(localLabel);
+    sliderContainer.appendChild(labelsContainer);
+
+    // Add event listener to update the mode
+    slider.addEventListener("input", function () {
+      const value = parseInt(this.value);
+      if (value === 0) {
+        window.extensionMode = EXTENSION_MODES.ALWAYS_CLOUD;
+      } else if (value === 1) {
+        window.extensionMode = EXTENSION_MODES.ASK_EVERY_TIME;
+      } else if (value === 2) {
+        window.extensionMode = EXTENSION_MODES.ALWAYS_LOCAL;
+      }
+    });
+
+    document.body.appendChild(sliderContainer);
+  }
+
+  // Create the mode selector when the DOM is fully loaded
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", createModeSelector);
+  } else {
+    // DOM already loaded, create the selector immediately
+    createModeSelector();
+  }
+
   // Helper: Create overlay pop-up with the prompt and buttons.
   function createPopup(promptText) {
     return new Promise((resolve) => {
@@ -32,7 +132,7 @@ if (!window.myExtensionInitialized) {
         backgroundColor: "#fff",
         padding: "20px",
         borderRadius: "8px",
-        width: "50%",
+        width: "40%",
         maxWidth: "500px",
         boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
         fontFamily: "Arial, sans-serif",
@@ -85,7 +185,7 @@ if (!window.myExtensionInitialized) {
           label: `${formatScientific(water_usage)} milliliters of water`,
         },
         {
-          emoji: "🏭",
+          emoji: "💨",
           label: `${formatScientific(carbon_usage)} grams of CO2`,
         },
       ];
@@ -191,6 +291,25 @@ if (!window.myExtensionInitialized) {
   window.addEventListener("ExtensionPopupRequest", async (event) => {
     if (event.detail && event.detail.prompt) {
       const promptText = event.detail.prompt;
+
+      // Check the current mode
+      if (window.extensionMode === EXTENSION_MODES.ALWAYS_CLOUD) {
+        // Always use cloud, no popup
+        const responseEvent = new CustomEvent("ExtensionPopupResponse", {
+          detail: { decision: "cloud" },
+        });
+        window.dispatchEvent(responseEvent);
+        return;
+      } else if (window.extensionMode === EXTENSION_MODES.ALWAYS_LOCAL) {
+        // Always use local, no popup
+        const responseEvent = new CustomEvent("ExtensionPopupResponse", {
+          detail: { decision: "local" },
+        });
+        window.dispatchEvent(responseEvent);
+        return;
+      }
+
+      // Ask every time mode - show popup
       const decision = await createPopup(promptText);
       const responseEvent = new CustomEvent("ExtensionPopupResponse", {
         detail: { decision },
